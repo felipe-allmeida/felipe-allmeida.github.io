@@ -1,17 +1,20 @@
-# Continuous testing on a .NET Core 3.1 application - Part 1
-
-What's up everyone?
-
-This is the first part of this article series. In it we will learn what they are and create unit, integration and functional tests as well as put them in our deployment pipeline on Azure.
-
-In this article I will cover:
-* Unit Tests
-* Integration Tests
+# Software Testing in a .NET Core 3.1 web application - Part 1
 
 ## Requirements
 
 * [.NET Core 3.1](https://dotnet.microsoft.com/download/dotnet-core/3.1)
 * [Visual Studio](https://visualstudio.microsoft.com/pt-br/downloads/)
+
+## So, what is Software Testing?
+
+> Is an organizational process within software development in which business-critical software is verified for correctness, quality and performance. Software testing is used to ensure that expected business systems and product features behave correctly as expected.
+> Claire Maynard
+
+Those tests can either be manual or an automated process:
+
+* **Manual software testing**, led by a team or individual who will manually operate a software and ensure it behaves as expected by running some tests.
+* **Automated software testing** is the automated version of the manual software testing.
+
 
 ## What are Unit Tests?
 
