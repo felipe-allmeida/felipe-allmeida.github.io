@@ -110,9 +110,3 @@ To validate the test, we check if the request response is a `201 Created` and if
 The tests on this article are fairly simple, this is how a test should be. In order to detect errors as soon as possible in our code, we also have fail fast, that means we need to have simple tests covering **our application** functionallity.
 
 In the next part, we will set some functional tests and some health checks in our web api.
-
-# References
-* https://www.eduardopires.net.br/2017/07/ferramentas-para-escrever-testes-de-unidade-mais-eficientes/
-* https://github.com/dotnet/roslyn
-* https://docs.microsoft.com/pt-br/dotnet/core/testing/unit-testing-with-dotnet-test
-
