@@ -17,7 +17,7 @@ In this article I will cover:
 
 Unit Testing is the practice of testing small pieces of code, typycally individual functions, alone and isolated. If you have to access some external service, it's not a unit test.
 
-Here we have a simple one, using [Xunit](https://www.nuget.org/packages/xunit/) that checks if a product is on stock:
+Here we have a simple one, using [Xunit](https://www.nuget.org/packages/xunit/) that checks if a product stock is being debited:
 ```C#
 [Fact]
 public void DebitStock_ShouldDebitValueFromStock()
@@ -29,7 +29,7 @@ public void DebitStock_ShouldDebitValueFromStock()
     Assert.Equal(9, product.StockQuantity);
 }
 ```
-Fairly simple right? And yet we're testing a important funcionallity from our application. I'll create another one, this time I expect an error.
+Fairly simple right? And yet we're testing a **real funcionallity** from our application. I'll create another one, this time I expect an error.
 ```C#
 [Fact]
 public void DebitStock_WhenNoStockAvaiable_ShouldThrowException()
@@ -47,9 +47,11 @@ Just by reading this you can understend what are our business rules right? We ha
 Now imagine that for all our business rules we have small pieces of tests like the ones above covering our code, the smallest change in the rules would be detected by our tests. This way we're ensuring that our code is following the business needs.
 
 ## Integration Tests
-Integration tests are very similar to unit tests, but with one big difference: while unit tests are isolated from external services, integration tests are not.
+Integration tests are very similar to unit tests, but with one big difference: while unit tests are isolated from external services, integration tests are not. Integration tests 
+confirm that two or more app components work together to produce an expected result.
 
-So, for this example I'll use a WebApi, we will have to build a testing environment in order to perform our tests:
+So, let's go for a example where we only have one two components: a web api and a database.
+In order to initialize both component's, we're going to create a test environment that will load only the necessary dependencies for the test:
 ```C#
 public static class Server
 {
@@ -77,8 +79,9 @@ public static class Server
     }
 }
 ```
+In this exampkle 
 
-Now that we have our test environment, let's perform a integration test:
+Now that we have our test environment, let's create a integration test:
 ```C#
 [Fact]
 public void Post_CreateProduct_ShouldCreateProduct()
