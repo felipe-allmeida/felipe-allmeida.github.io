@@ -1,4 +1,4 @@
-# Software Testing in a .NET Core 3.1 web application - Part 1
+# Software Testing in a .NET Core 3.1 web application
 
 ## Requirements
 
@@ -251,10 +251,82 @@ public class DatabaseHealthCheck : IHealthCheck
 }
 ```
 
+## Testing in a continuous delivery pipeline (Azure Pipelines)
 
+Let's use our tests in a continuous delivery pipeline to ensure quality to our software. Whenever our code is delivered to our master branch, we will automatically build, test and deploy it by using azure pipelines.
+
+Here is a simple .yml file that execute the following pipeline steps on the master branch:
+1. Run unit tests
+2. Run integration tests
+3. Deploy to azure
+4. Run health checks
+5. Run functional tests
+
+```yml
+trigger:
+- master
+
+pool:
+  vmImage: ubuntu-16.04
+ 
+name: PipelineName-${Date:yyyyMMdd}$(Rev:.r)
+
+variables:
+  ASPNETCORE_ENVIRONMENT: 'Production'
+  buildConfiguration: 'Release'
+
+steps:   
+- task: DotNetCoreCLI@2
+  displayName: 'unit tests'
+  inputs:
+    command: test
+    projects: '**/*UnitTests/*.csproj'
+    
+- task: DotNetCoreCLI@2
+  displayName: 'integration tests'
+  inputs:
+    command: test
+    projects: '**/*IntegrationTests/*.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet publish'
+  inputs:
+    command: publish
+    publishWebProjects: True
+    arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    zipAfterPublish: True
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
+    artifactName: 'myWebsiteName'
+
+- task: AzureWebApp@1
+  displayName: 'deploy artifacts'
+  inputs:
+    azureSubscription: ${{ parameters.azureSubscription }}
+    appType: webApp
+    appName: 'yourWebsiteName'
+    package: $(System.ArtifactsDirectory)/**/*.zip 
+    
+- task: DotNetCoreCLI@2
+      displayName: 'health checks'
+      inputs:
+        command: test
+        projects: '**/*HealthChecks/*.csproj'
+        
+- task: DotNetCoreCLI@2
+      displayName: 'functional tests'
+      inputs:
+        command: test
+        projects: '**/*FunctionalTests/*.csproj'
+```
+This .yml is already working, you can just create a new pipeline on azure and add this code to run your pipeline!
 
 ## Conclusion
 
 The tests on this article are fairly simple, this is how a test should be. In order to detect errors as soon as possible in our code, we also have fail fast, that means we need to have simple tests covering **our application** functionallity.
 
-In the next part, we will set some functional tests and some health checks in our web api.
+I advocate that every good developer test their code to ensure quality. There is no "I didn't have time to test", testing is proven to reduce problems, with no problems there is no extra hour and with no extra hour your company spend less money.
+
+More tests = Less problems = Less money spent in the project
