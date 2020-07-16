@@ -15,6 +15,11 @@ Those tests can either be manual or an automated process:
 * **Manual software testing**, led by a team or individual who will manually operate a software and ensure it behaves as expected by running some tests.
 * **Automated software testing** is the automated version of the manual software testing.
 
+## And about the benefits?
+
+Testing will save tons of time **and money**. Testing will ensure that a feature is working as expected by the business, preventing users to find any bug while they use the software.
+
+Also for developing new features, if we have the tests properly setup, the time to implement is reduced considerably because we already know what to output and that is already tested. And by running tests against an already delivered feature we ensure that our changes are not breaking anything that is already working.
 
 ## What are Unit Tests?
 
