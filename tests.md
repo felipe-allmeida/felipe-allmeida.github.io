@@ -158,7 +158,8 @@ The above example it's creating a host, using the `Startup` file and configurati
 This tests, as the name suggests, has the objective of validating if our project is alright. In our case, our API consumes and writes in a database, so in order for or API works healthy it **must** be connected to our database.
 
 We can perform a simple check by just trying the command `SELECT 1` on our database. If it succeeds it means we are connected, so we return **healthy** as a response, otherwise **unhealthy**.
-```
+Startup.cs
+```C#
 public class Startup
 {    
     public void ConfigureServices(IServiceCollection services)
@@ -168,8 +169,46 @@ public class Startup
         */    
         services.AddHealthChecks().AddCheck("my-database-name", new DatabaseHealthCheck("my-database-connection-string"));
     }
-}
+    
+    public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+    {
+        /*
+        * Your code....
+        */         
+        app.UseHealthChecks("/health", new HealthCheckOptions
+        {
+            AllowCachingResponses = false,
+            ResponseWriter = async (c, r) =>
+            {
+                c.Response.ContentType = "application/json";
 
+                var results = r.Entries.Select(pair =>
+                {
+                    return KeyValuePair.Create(pair.Key, new ResponseResults
+                    {
+                        Status = pair.Value.Status.ToString(),
+                        Description = pair.Value.Description,
+                        Duration = pair.Value.Duration.TotalSeconds.ToString() + "s",
+                        ExceptionMessage = pair.Value.Exception != null ? pair.Value.Exception.Message : "",
+                        Data = pair.Value.Data
+                    });
+                }).ToDictionary(p => p.Key, p => p.Value);                
+                
+                var result = new HealthCheckResponse
+                {
+                    Status = r.Status.ToString(),
+                    TotalDuration = r.TotalDuration.TotalSeconds.ToString() + "s",
+                    Results = results
+                };
+                
+                await c.Response.WriteAsync(JsonConvert.SerializeObject(result));
+            };
+        });
+    }
+}
+```
+DatabaseHealthCheck.cs
+```C#
 public class DatabaseHealthCheck : IHealthCheck
 {
     private static readonly string DefaultTestQuery = "SELECT 1";
@@ -211,6 +250,7 @@ public class DatabaseHealthCheck : IHealthCheck
     }
 }
 ```
+
 
 
 ## Conclusion
