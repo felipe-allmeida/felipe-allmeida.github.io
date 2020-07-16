@@ -21,11 +21,13 @@ Testing will save tons of time **and money**. Testing will ensure that a feature
 
 Also for developing new features, if we have the tests properly setup, the time to implement is reduced considerably because we already know what to output and that is already tested. And by running tests against an already delivered feature we ensure that our changes are not breaking anything that is already working.
 
-## What are Unit Tests?
+## Unit Tests
 
 Unit Testing is the practice of testing small pieces of code, typycally individual functions, alone and isolated. If you have to access some external service, it's not a unit test.
 
-Here we have a simple one, using [Xunit](https://www.nuget.org/packages/xunit/) that checks if a product stock is being debited:
+They have the goal to test small pieces of business requirements by passing an input and comparing a expected result with the code output.
+
+Here's a simple one, using [Xunit](https://www.nuget.org/packages/xunit/) that checks if a product stock is being debited:
 ```C#
 [Fact]
 public void DebitStock_ShouldDebitValueFromStock()
@@ -37,7 +39,7 @@ public void DebitStock_ShouldDebitValueFromStock()
     Assert.Equal(9, product.StockQuantity);
 }
 ```
-Fairly simple right? And yet we're testing a **real funcionallity** from our application. I'll create another one, this time I expect an error.
+Fairly simple right? And yet we're testing a **real funcionallity** from our application. I'll create another one, this time I'll test a error situation.
 ```C#
 [Fact]
 public void DebitStock_WhenNoStockAvaiable_ShouldThrowException()
