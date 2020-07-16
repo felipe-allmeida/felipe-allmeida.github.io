@@ -113,6 +113,106 @@ Then, we start a post rest request for the webapi endpoint `/api/product` passin
 
 To validate the test, we check if the request response is a `201 Created` and if the productViewModel has returned a Id, that is, our product was created successfully.
 
+## Functional or end-to-end (e2e) tests
+
+This guys are the real deal. They are used to simulate a **full user-level experience**. Things like:
+* **Click on subscribe** - Should add you're e-mail to the subscribers list and whenever there is a new notification update all subscribed users.
+* **Click on create** - Should subimit a form containing the model and save it on the database.
+* **LogIn** - Should require e-mail and a password and when logged allow the user to access the web site.
+
+So, for this I'll we will create a similar code from the one we used on the integration tests, check out:
+```C#
+public static class Server
+{
+    public static TestServer CreateServer()
+    {
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+        
+        var host = new WebHostBuilder()
+            .UseEnvironment(environment)
+            .ConfigureAppConfiguration((hostContext, configApp) =>
+            {
+                var path = GetBasePathFromAssembly(typeof(Startup));
+                configApp.SetBasePath(path);
+                configApp.AddJsonFile("appsettings.json", optional: true);
+                configApp.AddJsonFile($"appsettings.{hostContext.HostingEnvironment.EnvironmentName}.json", optional: true);
+            })
+            .UseStartup<Startup>();
+                    
+        return new TestServer(host);
+    }
+}
+
+private static string GetBasePathFromAssembly(Type type)
+{
+    string codeBase = Assembly.GetAssembly(type).CodeBase;
+    UriBuilder uri = new UriBuilder(codeBase);
+    string path = Uri.UnescapeDataString(uri.Path);
+    return Path.GetDirectoryName(path);
+}
+```
+The above example it's creating a host, using the `Startup` file and configurations of our the api. Basically it is simulating our real environment. The test code itself is similar to the integration in our case because we have only a web api, but if we had several other api's to consume, we would just add the needed communication to do the test
+
+## Health Checks
+
+This tests, as the name suggests, has the objective of validating if our project is alright. In our case, our API consumes and writes in a database, so in order for or API works healthy it **must** be connected to our database.
+
+We can perform a simple check by just trying the command `SELECT 1` on our database. If it succeeds it means we are connected, so we return **healthy** as a response, otherwise **unhealthy**.
+```
+public class Startup
+{    
+    public void ConfigureServices(IServiceCollection services)
+    {
+        /*
+        * Your code....
+        */    
+        services.AddHealthChecks().AddCheck("my-database-name", new DatabaseHealthCheck("my-database-connection-string"));
+    }
+}
+
+public class DatabaseHealthCheck : IHealthCheck
+{
+    private static readonly string DefaultTestQuery = "SELECT 1";
+    private string ConnectionString { get; }
+    private string TestQuery { get; }
+
+    public DatabaseHealthCheck(string connectionString, string testQuery = null)
+    {
+        if (String.IsNullOrEmpty(connectionString)) throw new ArgumentNullException(nameof(connectionString));
+
+        if (!String.IsNullOrEmpty(testQuery)) TestQuery = testQuery;
+        else TestQuery = DefaultTestQuery;
+
+        ConnectionString = connectionString;            
+    }
+
+    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+    {
+        var dataSource = Regex.Match(ConnectionString, @"Data Source=([A-Za-z0-9_.]+)", RegexOptions.IgnoreCase).Value;
+
+        using (var connection = new MySqlConnection(ConnectionString))
+        {
+            try
+            {
+                await connection.OpenAsync(cancellationToken);
+
+                var command = connection.CreateCommand();
+                command.CommandText = TestQuery;
+
+                await command.ExecuteNonQueryAsync(cancellationToken);
+
+                return HealthCheckResult.Healthy(dataSource);
+            }
+            catch (Exception e)
+            {
+                return HealthCheckResult.Unhealthy(dataSource, e);
+            }
+        }
+    }
+}
+```
+
+
 ## Conclusion
 
 The tests on this article are fairly simple, this is how a test should be. In order to detect errors as soon as possible in our code, we also have fail fast, that means we need to have simple tests covering **our application** functionallity.
