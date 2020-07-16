@@ -82,9 +82,7 @@ public static class Server
     }
 }
 ```
-In this exampkle 
-
-Now that we have our test environment, let's create a integration test:
+With our dependencies loaded, now is the time to write a integration test:
 ```C#
 [Fact]
 public void Post_CreateProduct_ShouldCreateProduct()
