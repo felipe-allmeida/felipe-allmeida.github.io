@@ -329,4 +329,4 @@ The tests on this article are fairly simple, this is how a test should be. In or
 
 I advocate that every good developer test their code to ensure quality. There is no "I didn't have time to test", testing is proven to reduce problems, with no problems there is no extra hour and with no extra hour your company spend less money.
 
-More tests = Less problems = Less money spent in the project
+`More tests` = `Less problems` = `Less money spent in the project`
